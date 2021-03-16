@@ -67,11 +67,13 @@ const useInput = (initialValue) => {
 };
 
 const validate = (id, value) => {
-  if (id < 8 && !parseFloat(value)) return false;
+  const floatV = parseFloat(value);
+  const intV = parseInt(value);
+  if (id < 8 && (!floatV || floatV < -100 || floatV > 100)) return false;
   else {
-    if (id == 8 && !parseInt(value)) return false;
+    if (id == 8 && (!intV || intV < 0 || intV > 200)) return false;
     else {
-      if (id == 9 && (!parseFloat(value) || parseFloat(value) > 1 || parseFloat(value) < 0.0001)) return false;
+      if (id == 9 && (!floatV || floatV > 1 || floatV < 0.0001)) return false;
       else return true;
     }
   }
