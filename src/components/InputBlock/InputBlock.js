@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 
 import { Input } from './Input';
+import * as actions from '../../myRedux/actions';
+import * as selectors from '../../myRedux/selectors';
+import { recalculateDeltas } from '../../Calculations';
 
 const InputBlockWRapper = styled.div`
   width: 615px;
@@ -59,7 +63,6 @@ const useInput = (initialValue) => {
       event.target.style.outline = '2px solid red';
       //setIsInputWrong(true)
     }
-    //console.log(!parseFloat(eValue), eValue);
     setValue(eValue);
   };
 
@@ -79,7 +82,7 @@ const validate = (id, value) => {
   }
 };
 
-export const InputBlock = () => {
+const InputBlock = (props) => {
   const A = useInput('10');
   const B = useInput('10');
   const C = useInput('10');
@@ -116,7 +119,28 @@ export const InputBlock = () => {
         <br />
         argmax(rn)={1488}
       </Info>
-      <Button onClick={() => {}}>Вычислить</Button>
+      <Button
+        onClick={() => {
+          props.dispatch(actions.calculateX());
+        }}
+      >
+        Вычислить
+      </Button>
+      <button
+        onClick={() => {
+          recalculateDeltas();
+          props.dispatch(actions.calculateFunctions(props.args.x));
+        }}
+      >
+        jopa
+      </button>
     </InputBlockWRapper>
   );
 };
+
+export const InputBlockContainer = connect((state) => {
+  return {
+    args: selectors.getArgs(state),
+    functions: selectors.getFunctions(state)
+  };
+})(InputBlock);

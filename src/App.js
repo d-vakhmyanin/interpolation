@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { Chart } from './Chart';
+import { Chart } from './components/Chart';
 import { Header } from './components/Header/Header';
-import { InputBlock } from './components/InputBlock/InputBlock';
+import { InputBlockContainer as InputBlock } from './components/InputBlock/InputBlock';
 
 const AppWrapper = styled.div`
   font-family: sans-serif;
