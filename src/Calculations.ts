@@ -1,24 +1,27 @@
-//просто какие-то константы
-const alpha = 1;
-const beta = 1;
-const epsilon = 1;
-const mu = 1;
-const d = 1;
+import { store } from './index';
+import * as selectors from './myRedux/selectors';
 
-//отрезок вычислений значений функций
-const a = -10;
-const b = 10;
+// просто какие-то константы
+let alpha: number;
+let beta: number;
+let epsilon: number;
+let mu: number;
+let d: number;
 
-//число узлов интерполяции
-const n = 10;
-//шаг
-const h = (b - a) / n;
-//ВАЖНО! h-не шаг вычисления значений функций!!!
-//узлы интерполяции равноотстоящие, то есть Xi+1 - Xi = h (где i и i+1 - индексы узлов),
-//причём X0=a, Xn=b, функция действительно вычисляется в этих точках, но не только в них
+// отрезок вычислений значений функций
+let a: number;
+let b: number;
 
-//симметричные разности
-//зависят только от a, b и n, вычисляются только при изменении этих параметров
+// число узлов интерполяции
+let n: number;
+
+// шаг
+let h: number;
+// ВАЖНО! h-не шаг вычисления значений функций!!!
+// узлы интерполяции равноотстоящие, то есть Xi+1 - Xi = h (где i и i+1 - индексы узлов),
+// причём X0=a, Xn=b, функция действительно вычисляется в этих точках, но не только в них
+
+// симметричные разности
 let deltas: number[];
 type deltaType = {
   d: number;
@@ -27,17 +30,32 @@ type deltaType = {
 };
 let deltaStash: deltaType[];
 
+export const setLocalParams = () => {
+  const constants = selectors.getConstants(store.getState());
+
+  alpha = constants.greek.alpha;
+  beta = constants.greek.beta;
+  epsilon = constants.greek.epsilon;
+  mu = constants.greek.mu;
+  d = constants.greek.delta;
+
+  a = constants.area.A;
+  b = constants.area.B;
+  n = constants.area.n;
+
+  h = (b - a) / n;
+  recalculateDeltas();
+};
+
 export const recalculateDeltas = () => {
   deltas = [];
   deltaStash = [];
   for (let i = 0; i < 2 * n + 2; i++) deltas.push(delta(i, 0.5));
-  console.log(deltas);
 };
 
 const delta = (degree: number, index: number): number => {
   const stashed = deltaStash.find((elem) => elem.d === degree && elem.i === index);
   if (stashed) {
-    console.log('stash read!');
     return stashed.val;
   }
 
@@ -65,7 +83,10 @@ const delta = (degree: number, index: number): number => {
 ////////////////////////целевая функция и её разностная производная//////////////////////////////////
 export const calculate_F = (x: number): number => {
   //if (x === mu) return Infinity;
-  return alpha * Math.sin(beta * x) * Math.cos(epsilon / Math.pow(x - mu, 2));
+  const val = alpha * Math.sin(beta * x) * Math.cos(epsilon / Math.pow(x - mu, 2));
+  if (!isNaN(val)) return val;
+  console.log(x);
+  return 0;
 };
 
 export const calculate_dF = (x: number): number => {
@@ -73,19 +94,19 @@ export const calculate_dF = (x: number): number => {
 };
 
 ////////////////////////интерполирующий полином и его разностная производная/////////////////////////
-//полином не можем захардкодить как функцию, ведь он зависит от числа узлов интерполяции (n)
-//чтобы посчитать значения полинома, нужно предварительно посчитать все симметричные разности и коэффициенты,
-//на которые эти разности домножаются
+// полином не можем захардкодить как функцию, ведь он зависит от числа узлов интерполяции (n)
+// чтобы посчитать значения полинома, нужно предварительно посчитать все симметричные разности и коэффициенты,
+// на которые эти разности домножаются
 
-//рекурентное вычисление коэфициента при симметричной разности в точке x=x0+t*h
-//m-массив предыдущих коэффициентов
+// рекурентное вычисление коэфициента при симметричной разности в точке x=x0+t*h
+// m-массив предыдущих коэффициентов
 const coefficient = (t: number, m: number[]): number => {
   const l = m.length;
   if (l % 2 === 0) return m[l - 2] * (t + l / 2 - 1) * (t - l / 2);
   return (m[l - 1] * (t - 0.5)) / l;
 };
 
-//теперь можем считать полином в точке x
+// теперь можем считать полином в точке x
 export const calculate_Pn = (x: number): number => {
   const t = (x - a) / h;
   const m = [1];

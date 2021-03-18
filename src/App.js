@@ -1,27 +1,38 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 
-import { Chart } from './components/Chart';
-import { Header } from './components/Header/Header';
+import { ChartContainer as Chart } from './components/Chart';
+import { HeaderContainer as Header } from './components/Header/Header';
 import { InputBlockContainer as InputBlock } from './components/InputBlock/InputBlock';
+import * as actions from './myRedux/actions';
+import * as selectors from './myRedux/selectors';
+import { setLocalParams } from './Calculations';
 
 const AppWrapper = styled.div`
   font-family: sans-serif;
+  overflow: hidden;
 `;
 
-export const App = () => {
-  const [args, setArgs] = useState({
-    leftBorder: -10,
-    rightBorder: 10,
-    step: 0.05
-  });
+const ChartWrapper = styled.div`
+  width: 95vw;
+  height: 75vh;
+`;
+
+const App = (props) => {
+  useEffect(() => {
+    setLocalParams();
+    props.dispatch(actions.calculateX());
+  }, []);
   return (
     <AppWrapper>
       <Header />
-      <div style={{ width: '95vw', height: '75vh' }}>
-        <Chart leftBorder={args.leftBorder} rightBorder={args.rightBorder} step={args.step} />
-      </div>
+      <ChartWrapper>
+        <Chart />
+      </ChartWrapper>
       <InputBlock />
     </AppWrapper>
   );
 };
+
+export const AppContainer = connect()(App);

@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 
 import { Input } from './Input';
 import * as actions from '../../myRedux/actions';
 import * as selectors from '../../myRedux/selectors';
-import { recalculateDeltas } from '../../Calculations';
 
 const InputBlockWRapper = styled.div`
   width: 615px;
@@ -53,15 +52,17 @@ const Button = styled.button`
   opacity: ${({ disabled }) => (disabled ? '0.2' : '1')};
 `;
 
-const useInput = (initialValue) => {
+const useInput = (initialValue, dispatch, isWrong) => {
   const [value, setValue] = useState(initialValue);
   const onChange = (event) => {
     const eValue = event.target.value;
     const eId = event.target.id;
-    if (validate(eId, eValue)) event.target.style.outline = '';
-    else {
+    if (validate(eId, eValue)) {
+      event.target.style.outline = '';
+      if (isWrong) dispatch(actions.setInputWrongness(false));
+    } else {
       event.target.style.outline = '2px solid red';
-      //setIsInputWrong(true)
+      dispatch(actions.setInputWrongness(true));
     }
     setValue(eValue);
   };
@@ -83,19 +84,42 @@ const validate = (id, value) => {
 };
 
 const InputBlock = (props) => {
-  const A = useInput('10');
-  const B = useInput('10');
-  const C = useInput('10');
-  const D = useInput('10');
+  console.log(props.maxRn);
+  const A = useInput(props.area.A, props.dispatch, props.isInputWrong);
+  const B = useInput(props.area.B, props.dispatch, props.isInputWrong);
+  const C = useInput(props.area.C, props.dispatch, props.isInputWrong);
+  const D = useInput(props.area.D, props.dispatch, props.isInputWrong);
 
-  const alpha = useInput('1');
-  const beta = useInput('1');
-  const epsilon = useInput('1');
-  const mu = useInput('1');
+  const alpha = useInput(props.greek.alpha, props.dispatch, props.isInputWrong);
+  const beta = useInput(props.greek.beta, props.dispatch, props.isInputWrong);
+  const epsilon = useInput(props.greek.epsilon, props.dispatch, props.isInputWrong);
+  const mu = useInput(props.greek.mu, props.dispatch, props.isInputWrong);
 
-  const n = useInput('50');
-  const delta = useInput('0.01');
+  const n = useInput(props.area.n, props.dispatch, props.isInputWrong);
+  const delta = useInput(props.greek.delta, props.dispatch, props.isInputWrong);
 
+  const handleSubmit = useCallback(() => {
+    props.dispatch(
+      actions.updateConstants(
+        {
+          alpha: parseFloat(alpha.value),
+          beta: parseFloat(beta.value),
+          epsilon: parseFloat(epsilon.value),
+          mu: parseFloat(mu.value),
+          delta: parseFloat(delta.value)
+        },
+        {
+          A: parseFloat(A.value),
+          B: parseFloat(B.value),
+          C: parseFloat(C.value),
+          D: parseFloat(D.value),
+          n: parseInt(n.value)
+        }
+      )
+    );
+    props.dispatch(actions.calculateX());
+    props.dispatch(actions.calculateFunctions(props.args.x));
+  }, [A, B, C, D, alpha, beta, epsilon, mu, delta, n]);
   return (
     <InputBlockWRapper>
       <ABCD>
@@ -115,32 +139,23 @@ const InputBlock = (props) => {
         <Input id="9" label="Δ" {...delta} />
       </Deltas>
       <Info>
-        |max(rn)|={228}
+        |max(rn)| = {props.maxRn?.toFixed(5)}
         <br />
-        argmax(rn)={1488}
+        argmax(rn) = {props.maxRnIndex?.toFixed(3)}
       </Info>
-      <Button
-        onClick={() => {
-          props.dispatch(actions.calculateX());
-        }}
-      >
+      <Button disabled={props.isInputWrong} onClick={handleSubmit}>
         Вычислить
       </Button>
-      <button
-        onClick={() => {
-          recalculateDeltas();
-          props.dispatch(actions.calculateFunctions(props.args.x));
-        }}
-      >
-        jopa
-      </button>
     </InputBlockWRapper>
   );
 };
-
-export const InputBlockContainer = connect((state) => {
-  return {
-    args: selectors.getArgs(state),
-    functions: selectors.getFunctions(state)
-  };
-})(InputBlock);
+// props.functions?.rn?.value.indexOf(maxRn)
+export const InputBlockContainer = connect((state) => ({
+  args: selectors.getArgs(state),
+  functions: selectors.getFunctions(state),
+  area: selectors.getConstants(state).area,
+  greek: selectors.getConstants(state).greek,
+  isInputWrong: selectors.getIsInputWrong(state),
+  maxRn: selectors.getMaxRn(state),
+  maxRnIndex: selectors.getMaxRnIndex(state)
+}))(InputBlock);

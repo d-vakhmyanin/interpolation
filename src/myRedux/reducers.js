@@ -1,32 +1,30 @@
 import * as actions from './actions';
 import * as funcs from '../Calculations';
 
-export const constantsReducer = (state = {}, action) => {
-  switch (action.type) {
-    case actions.INIT_SESSION:
-      return {
-        greek: {
-          alpha: 1,
-          beta: 1,
-          epsilon: 1,
-          mu: 1,
-          delta: 1
-        },
-        area: {
-          A: -10,
-          B: 10,
-          C: -1,
-          D: 1
-        }
-      };
-    case actions.UPDATE_CONSTANTS:
-      return {
-        greek: action.greek,
-        area: action.area
-      };
-    default:
-      return state;
+const initialConstantsState = {
+  greek: {
+    alpha: 1,
+    beta: 1,
+    epsilon: 1,
+    mu: 1,
+    delta: 0.1
+  },
+  area: {
+    A: -10,
+    B: 10,
+    C: -1,
+    D: 1,
+    n: 2
   }
+};
+export const constantsReducer = (state = initialConstantsState, action) => {
+  if (action.type === actions.UPDATE_CONSTANTS) {
+    return {
+      greek: action.greek,
+      area: action.area
+    };
+  }
+  return state;
 };
 
 export const argsReducer = (state = {}, action) => {
@@ -83,13 +81,11 @@ export const functionsReducer = (state = {}, action) => {
   }
 
   if (action.type === actions.TOGGLE_FUNCTION_VISIBILITY) {
-    return {
-      ...state.functions,
-      [action.payload]: {
-        ...state.functions[action.payload],
-        checked: !state.functions[action.payload].checked
-      }
-    };
+    if (state[action.payload] !== undefined)
+      return {
+        ...state,
+        [action.payload]: { ...state[action.payload], checked: !state[action.payload].checked }
+      };
   }
 
   return state;

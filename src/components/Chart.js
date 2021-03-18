@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { connect } from 'react-redux';
 import {
   LineChart,
   Line,
@@ -11,41 +12,34 @@ import {
   ReferenceLine
 } from 'recharts';
 
-const mainFunction = (x) => {
-  return Math.sin(x).toFixed(5);
+import * as selectors from '../myRedux/selectors';
+import * as colors from './colors';
+
+const recalculateValues = (props, arr) => {
+  arr = props.f?.map((elem, index) => {
+    arr.push({
+      x: props.args.x[index].toFixed(3),
+      f: elem.toFixed(3),
+      df: props.df[index].toFixed(3),
+      Pn: props.Pn[index],
+      dPn: props.dPn[index].toFixed(3),
+      rn: props.rn[index].toFixed(3)
+    });
+  });
 };
 
-const otherFunction = (x) => {
-  return Math.cos(x).toFixed(5);
-};
-
-const calculateValues = (leftBorder, rightBorder, step, array) => {
-  array.length = 0;
-  let i = leftBorder;
-  while (i <= rightBorder) {
-    if (Math.abs(i) < step / 10) array.push({ x: 0, y1: mainFunction(0), y2: otherFunction(0) });
-    else array.push({ x: i.toFixed(3), y1: mainFunction(i), y2: otherFunction(i) });
-    i += step;
-  }
-};
-
-export const Chart = ({ leftBorder, rightBorder, step, topBorder = 1, bottomBorder = -1 }) => {
-  const values = [];
-  let leftIndent = 0;
-  let rightIndent = 0;
+const Chart = (props) => {
+  let values = [];
   useMemo(() => {
-    calculateValues(leftBorder, rightBorder, step, values);
-    leftIndent = (rightBorder - leftBorder) / (2 * step) - 1 / step;
-    rightIndent = leftIndent + 2 / step;
-    console.log(values, leftIndent);
-  }, [leftBorder, rightBorder, step]);
+    recalculateValues(props, values);
+  }, [props]);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={values}>
         <CartesianGrid vertical={false} />
-        <XAxis dataKey="x" domain={[leftBorder, rightBorder]} />
-        <YAxis domain={[bottomBorder - 10 * step, topBorder + 10 * step]} label="y" />
+        <XAxis dataKey="x" domain={[props.constants.area.A, props.constants.area.B]} />
+        <YAxis domain={[props.constants.area.C, props.constants.area.D]} label="y" />
         <Tooltip
           wrapperStyle={{
             borderColor: 'white',
@@ -56,21 +50,35 @@ export const Chart = ({ leftBorder, rightBorder, step, topBorder = 1, bottomBord
         />
         <ReferenceLine y={0} stroke="black" strokeWidth={2} />
         <ReferenceLine x={0} stroke="black" strokeWidth={2} />
-        <Line dataKey="y1" stroke="#ff7300" dot={false} />
-        <Line dataKey="y2" stroke="blue" dot={false} />
-        <Line dataKey="y2" stroke="#febb" dot={false} />
-        <Line dataKey="y2" stroke="#fbb" dot={false} />
-        <Line dataKey="y2" stroke="#123" dot={false} />
-        <Line dataKey="y2" stroke="#f234" dot={false} />
+        {props.fVisible && <Line dataKey="f" stroke={colors.fColor} dot={false} />}
+        {props.PnVisible && <Line dataKey="Pn" stroke={colors.PnColor} dot={false} />}
+        {props.dfVisible && <Line dataKey="df" stroke={colors.dfColor} dot={false} />}
+        {props.dPnVisible && <Line dataKey="dPn" stroke={colors.dPnColor} dot={false} />}
+        {props.rnVisible && <Line dataKey="rn" stroke={colors.rnColor} dot={false} />}
         <Brush dataKey="x">
           <LineChart data={values} margin={{ top: 40, right: 40, bottom: 20, left: 20 }}>
             <CartesianGrid />
-            <YAxis hide domain={[bottomBorder - 10 * step, topBorder + 10 * step]} />
-            <Line dataKey="y1" stroke="#ff7300" dot={false} />
-            <Line dataKey="y2" stroke="blue" dot={false} />
+            <YAxis hide domain={[props.constants.area.C, props.constants.area.D]} />
+            <Line dataKey="f" stroke={colors.fColor} dot={false} />
+            <Line dataKey="Pn" stroke={colors.PnColor} dot={false} />
           </LineChart>
         </Brush>
       </LineChart>
     </ResponsiveContainer>
   );
 };
+
+export const ChartContainer = connect((state) => ({
+  constants: selectors.getConstants(state),
+  args: selectors.getArgs(state),
+  f: selectors.getFunctions(state)?.f?.values,
+  fVisible: selectors.getFunctions(state)?.f?.checked,
+  df: selectors.getFunctions(state)?.df?.values,
+  dfVisible: selectors.getFunctions(state)?.df?.checked,
+  Pn: selectors.getFunctions(state)?.Pn?.values,
+  PnVisible: selectors.getFunctions(state)?.Pn?.checked,
+  dPn: selectors.getFunctions(state)?.dPn?.values,
+  dPnVisible: selectors.getFunctions(state)?.dPn?.checked,
+  rn: selectors.getFunctions(state)?.rn?.values,
+  rnVisible: selectors.getFunctions(state)?.rn?.checked
+}))(Chart);

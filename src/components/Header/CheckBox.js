@@ -12,11 +12,13 @@ const ColoredLine = styled.div`
   align-self: center;
   margin-left: 3px;
 `;
-export const CheckBox = ({ label, color = 'blue' }) => {
+export const CheckBox = ({ label, color = 'blue', checked = '', onChange }) => {
   return (
     <CheckBoxWrapper>
-      <input type="checkbox" />
-      {label}
+      <label>
+        <input type="checkbox" checked={checked} onChange={onChange} />
+        {label}
+      </label>
       <ColoredLine color={color} />
     </CheckBoxWrapper>
   );
