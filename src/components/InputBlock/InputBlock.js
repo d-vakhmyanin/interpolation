@@ -73,7 +73,7 @@ const useInput = (initialValue, dispatch, isWrong) => {
 const validate = (id, value) => {
   const floatV = parseFloat(value);
   const intV = parseInt(value);
-  if (id < 8 && (!floatV || floatV < -100 || floatV > 100)) return false;
+  if (id < 8 && ((!floatV && floatV !== 0) || floatV < -100 || floatV > 100)) return false;
   else {
     if (id == 8 && (!intV || intV < 0 || intV > 200)) return false;
     else {
@@ -84,7 +84,6 @@ const validate = (id, value) => {
 };
 
 const InputBlock = (props) => {
-  console.log(props.maxRn);
   const A = useInput(props.area.A, props.dispatch, props.isInputWrong);
   const B = useInput(props.area.B, props.dispatch, props.isInputWrong);
   const C = useInput(props.area.C, props.dispatch, props.isInputWrong);
@@ -117,8 +116,7 @@ const InputBlock = (props) => {
         }
       )
     );
-    props.dispatch(actions.calculateX());
-    props.dispatch(actions.calculateFunctions(props.args.x));
+    props.dispatch(actions.calculateXAndFunctions());
   }, [A, B, C, D, alpha, beta, epsilon, mu, delta, n]);
   return (
     <InputBlockWRapper>

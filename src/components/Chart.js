@@ -16,14 +16,15 @@ import * as selectors from '../myRedux/selectors';
 import * as colors from './colors';
 
 const recalculateValues = (props, arr) => {
-  arr = props.f?.map((elem, index) => {
+  let i = 0;
+  arr = props.args?.x?.map((elem, index) => {
     arr.push({
-      x: props.args.x[index].toFixed(3),
-      f: elem.toFixed(3),
-      df: props.df[index].toFixed(3),
+      x: elem.toFixed(3),
+      f: props.f[index],
+      df: props.df[index],
       Pn: props.Pn[index],
-      dPn: props.dPn[index].toFixed(3),
-      rn: props.rn[index].toFixed(3)
+      dPn: props.dPn[index],
+      rn: props.rn[index]
     });
   });
 };
@@ -32,14 +33,19 @@ const Chart = (props) => {
   let values = [];
   useMemo(() => {
     recalculateValues(props, values);
-  }, [props]);
+    console.log(values);
+  }, [props.functions]);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={values}>
         <CartesianGrid vertical={false} />
-        <XAxis dataKey="x" domain={[props.constants.area.A, props.constants.area.B]} />
-        <YAxis domain={[props.constants.area.C, props.constants.area.D]} label="y" />
+        <XAxis dataKey="x" domain={[props.constants.area.A - 1, props.constants.area.B + 1]} />
+        <YAxis
+          dataKey="f"
+          domain={[props.constants.area.C - 0.1, props.constants.area.D + 0.1]}
+          label="y"
+        />
         <Tooltip
           wrapperStyle={{
             borderColor: 'white',
@@ -71,6 +77,7 @@ const Chart = (props) => {
 export const ChartContainer = connect((state) => ({
   constants: selectors.getConstants(state),
   args: selectors.getArgs(state),
+  functions: selectors.getFunctions(state),
   f: selectors.getFunctions(state)?.f?.values,
   fVisible: selectors.getFunctions(state)?.f?.checked,
   df: selectors.getFunctions(state)?.df?.values,
