@@ -75,9 +75,9 @@ const validate = (id, value) => {
   const intV = parseInt(value);
   if (id < 8 && ((!floatV && floatV !== 0) || floatV < -100 || floatV > 100)) return false;
   else {
-    if (id == 8 && (!intV || intV < 0 || intV > 200)) return false;
+    if (id == 8 && (!intV || intV < 0 || intV > 100)) return false;
     else {
-      if (id == 9 && (!floatV || floatV > 1 || floatV < 0.0001)) return false;
+      if (id == 9 && (!floatV || floatV > 1 || floatV < 0.001)) return false;
       else return true;
     }
   }

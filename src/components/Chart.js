@@ -16,10 +16,12 @@ import * as selectors from '../myRedux/selectors';
 import * as colors from './colors';
 
 const recalculateValues = (props, arr) => {
-  let i = 0;
+  let tmp;
   arr = props.args?.x?.map((elem, index) => {
+    tmp = props.args.xn.find((xn) => Math.abs(xn - elem) < props.constants.greek.delta);
     arr.push({
-      x: elem.toFixed(3),
+      x: elem === 0 ? 0 : elem.toFixed(3),
+      xn: tmp ? 0 : undefined,
       f: props.f[index],
       df: props.df[index],
       Pn: props.Pn[index],
@@ -36,6 +38,11 @@ const Chart = (props) => {
     console.log(values);
   }, [props.functions]);
 
+  const tooltipFormatter = (value, name) => {
+    if (name === 'xn') return [name];
+    return [value, name];
+  };
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={values}>
@@ -49,13 +56,15 @@ const Chart = (props) => {
         <Tooltip
           wrapperStyle={{
             borderColor: 'white',
-            boxShadow: '2px 2px 3px 0px rgb(204, 204, 204)'
+            boxShadow: '2px 2px 3px 0px #cccccc'
           }}
-          contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
+          contentStyle={{ backgroundColor: '#ffffff' }}
           labelStyle={{ fontWeight: 'bold', color: '#666666' }}
+          formatter={tooltipFormatter}
         />
         <ReferenceLine y={0} stroke="black" strokeWidth={2} />
         <ReferenceLine x={0} stroke="black" strokeWidth={2} />
+        <Line dataKey="xn" stroke="black" dot={true} />
         {props.fVisible && <Line dataKey="f" stroke={colors.fColor} dot={false} />}
         {props.PnVisible && <Line dataKey="Pn" stroke={colors.PnColor} dot={false} />}
         {props.dfVisible && <Line dataKey="df" stroke={colors.dfColor} dot={false} />}

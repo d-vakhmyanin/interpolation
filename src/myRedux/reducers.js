@@ -116,9 +116,9 @@ export const functionsReducer = (state = {}, action) => {
         ...state,
         fn
       };
+    default:
+      return state;
   }
-
-  return state;
 };
 
 export const inputReducer = (state = false, action) => {
