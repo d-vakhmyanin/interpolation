@@ -2,21 +2,21 @@ import { store } from './index';
 import * as selectors from './myRedux/selectors';
 
 // просто какие-то константы
-let alpha: number;
-let beta: number;
-let epsilon: number;
-let mu: number;
-let d: number;
+let alpha: number = 1;
+let beta: number = 1;
+let epsilon: number = 1;
+let mu: number = 1;
+let d: number = 0.01;
 
 // отрезок вычислений значений функций
-let a: number;
-let b: number;
+let a: number = -10;
+let b: number = 10;
 
 // число узлов интерполяции
-let n: number;
+let n: number = 1;
 
 // шаг
-let h: number;
+let h: number = (b - a) / n;
 // ВАЖНО! h-не шаг вычисления значений функций!!!
 // узлы интерполяции равноотстоящие, то есть Xi+1 - Xi = h (где i и i+1 - индексы узлов),
 // причём X0=a, Xn=b, функция действительно вычисляется в этих точках, но не только в них
@@ -31,8 +31,28 @@ type deltaType = {
 };
 let deltaStash: deltaType[];
 
+let localConstants = {
+  greek: {
+    alpha,
+    beta,
+    epsilon,
+    mu,
+    delta: d
+  },
+  area: {
+    A: a,
+    B: b,
+    C: 0,
+    D: 1,
+    n
+  }
+};
+
 export const setLocalParams = () => {
   const constants = selectors.getConstants(store.getState());
+
+  if (JSON.stringify(localConstants) === JSON.stringify(constants)) return;
+  localConstants = constants;
 
   alpha = constants.greek.alpha;
   beta = constants.greek.beta;
@@ -48,7 +68,7 @@ export const setLocalParams = () => {
   recalculateDeltas();
 };
 
-export const recalculateDeltas = () => {
+const recalculateDeltas = () => {
   deltas = [];
   deltaStash = [];
   for (let i = 0; i < 2 * n + 2; i++) deltas.push(delta(i, 0.5));
@@ -161,6 +181,9 @@ export const calculateXn = (): number[] => {
 };
 
 ////////////////////вычисление функций в точках/////////////////////////////
-export const calculateFunction = (arr: number[], func: (x: number) => number): number[] => {
+export const calculateFunction = (
+  arr: number[],
+  func: (x: number) => number | undefined
+): (number | undefined)[] => {
   return arr.map((elem) => func(elem));
 };

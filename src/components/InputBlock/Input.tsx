@@ -15,7 +15,14 @@ const StyledInput = styled.input`
   margin: 3px;
 `;
 
-export const Input = ({ label, id, value, onChange }) => {
+type OwnProps = {
+  label: string;
+  id: string | undefined;
+  value: string;
+  onChange: (event: any) => void;
+};
+
+export const Input: React.FC<OwnProps> = ({ label, id, value, onChange }) => {
   return (
     <InputWrapper>
       <LabelWrapper>{label}</LabelWrapper>

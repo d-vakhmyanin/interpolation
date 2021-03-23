@@ -12,7 +12,20 @@ const ColoredLine = styled.div`
   align-self: center;
   margin-left: 3px;
 `;
-export const CheckBox = ({ label, color = 'blue', checked = '', onChange }) => {
+
+type OwnProps = {
+  label: string;
+  color: string;
+  checked: boolean;
+  onChange: () => void;
+};
+
+export const CheckBox: React.FC<OwnProps> = ({
+  label,
+  color = 'blue',
+  checked = false,
+  onChange
+}) => {
   return (
     <CheckBoxWrapper>
       <label>
