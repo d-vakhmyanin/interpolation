@@ -28,6 +28,15 @@ type ChartData = {
 
 let values: ChartData[];
 
+const approximation = 100000;
+
+const reduce = (val: number | undefined): number | undefined => {
+  if (val === undefined) return undefined;
+  if (val > approximation) return approximation;
+  if (val < -approximation) return -approximation;
+  return val;
+};
+
 const recalculateValues = (
   args: ArgsState,
   functions: FunctionsState,
@@ -37,14 +46,17 @@ const recalculateValues = (
   let tmp;
   args.x.map((elem, index) => {
     tmp = args.xn.find((xn) => Math.abs(xn - elem) < constants.greek.delta);
+    let PVal = reduce(functions.Pn.values[index]);
+    let dPVal = reduce(functions.dPn.values[index]);
+    let rnVal = reduce(functions.rn.values[index]);
     return arr.push({
       x: elem === 0 ? 0 : Number.parseFloat(elem.toFixed(3)),
       xn: tmp ? 0 : undefined,
       f: functions.f.values[index],
       df: functions.df.values[index],
-      Pn: functions.Pn.values[index],
-      dPn: functions.dPn.values[index],
-      rn: functions.rn.values[index] === -1 ? undefined : functions.rn.values[index]
+      Pn: PVal,
+      dPn: dPVal,
+      rn: rnVal === -1 ? undefined : rnVal
     });
   });
 };

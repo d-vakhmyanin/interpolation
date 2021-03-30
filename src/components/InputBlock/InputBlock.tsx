@@ -52,11 +52,7 @@ const Button = styled.button`
   opacity: ${({ disabled }) => (disabled ? '0.2' : '1')};
 `;
 
-const useInput = (
-  initialValue: number,
-  setInputWrongness: (isInputWrong: boolean) => void,
-  isWrong: boolean
-) => {
+const useInput = (initialValue: number, setInputWrongness: (isInputWrong: boolean) => void, isWrong: boolean) => {
   const [value, setValue] = useState(initialValue.toString());
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const eValue = event.target.value;
@@ -80,7 +76,7 @@ const validate = (strId: string, value: string) => {
   const intV = parseInt(value);
   if (id < 8 && ((!floatV && floatV !== 0) || floatV < -100 || floatV > 100)) return false;
   else if (id === 8 && (!intV || intV < 0 || intV > 100)) return false;
-  else if (id === 9 && (!floatV || floatV > 1 || floatV < 0.001)) return false;
+  else if (id === 9 && (!floatV || floatV > 1)) return false;
   else return true;
 };
 

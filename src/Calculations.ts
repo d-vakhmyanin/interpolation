@@ -71,8 +71,16 @@ export const setLocalParams = () => {
 const recalculateDeltas = () => {
   deltas = [];
   deltaStash = [];
-  for (let i = 0; i < 2 * n + 2; i++) deltas.push(delta(i, 0.5));
-  console.log(deltas);
+  for (let i = 0; i < 2 * n + 2; i++)
+    if (i % 2 === 0) {
+      const d1 = delta(i, -(i / 2));
+      const d2 = delta(i, -(i / 2) + 1);
+      if (d1 !== undefined && d2 !== undefined) deltas.push((d1 + d2) / 2);
+      else deltas.push(undefined);
+    } else {
+      deltas.push(delta(i, -((i - 1) / 2)));
+    }
+  console.log(deltas, 'deltas');
 };
 
 const delta = (degree: number, index: number): number | undefined => {
@@ -90,8 +98,8 @@ const delta = (degree: number, index: number): number | undefined => {
     });
     return value;
   }
-  const complexDelta1 = delta(degree - 1, index + 0.5);
-  const complexDelta2 = delta(degree - 1, index - 0.5);
+  const complexDelta1 = delta(degree - 1, index + 1);
+  const complexDelta2 = delta(degree - 1, index);
   let answer;
   if (complexDelta1 !== undefined && complexDelta2 !== undefined)
     answer = complexDelta1 - complexDelta2;
@@ -105,12 +113,12 @@ const delta = (degree: number, index: number): number | undefined => {
 
 ////////////////////////целевая функция и её разностная производная//////////////////////////////////
 export const calculate_F = (x: number): number | undefined => {
-  //if (x === mu) return undefined;
+  if (x === mu) return undefined;
   const val = alpha * Math.sin(beta * x) * Math.cos(epsilon / Math.pow(x - mu, 2));
   if (!isNaN(val)) return val;
   //console.log(x);
   return undefined;
-  // return x * x;
+  //return x * x;
 };
 
 export const calculate_dF = (x: number): number | undefined => {
@@ -130,7 +138,7 @@ const coefficient = (t: number, m: number[]): number => {
   const l = m.length;
   if (l === 1) return t - 0.5;
   let tmp;
-  if (l % 2 === 0) tmp = m[l - 2] * (t + l / 2 - 1) * (t - l / 2);
+  if (l % 2 === 0) tmp = (m[l - 2] * (t + l / 2 - 1) * (t - l / 2)) / (l - 1);
   else tmp = m[l - 1] * (t - 0.5);
   return tmp / l;
 };
@@ -145,7 +153,7 @@ export const calculate_Pn = (x: number): number | undefined => {
     let tmp = deltas[i];
     if (tmp) sum += m[i] * tmp;
   }
-  //console.log(t, m, sum);
+  //console.log(m, 'coeffs');
   //console.log(m, deltas, sum);
   return sum;
 };
