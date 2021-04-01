@@ -14,6 +14,13 @@ const ChartWrapper = styled.div`
   height: 75vh;
 `;
 
+const Info = styled.div`
+  margin: 0 auto;
+  margin-top: 30px;
+  width: 300px;
+  line-height: 20px;
+`;
+
 export const App = () => {
   return (
     <AppWrapper>
@@ -22,6 +29,13 @@ export const App = () => {
         <Chart />
       </ChartWrapper>
       <InputBlock />
+      <Info>
+        Функция: α*sin(β*x)*cos(ε/(x-μ)^2)
+        <br />
+        Метод: Бесселя
+        <br />
+        Выполнил: Вахмянин Даниил, ИТ-31
+      </Info>
     </AppWrapper>
   );
 };
